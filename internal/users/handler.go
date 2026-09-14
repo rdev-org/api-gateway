@@ -42,14 +42,8 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.GenerateToken(grpcResp.GetUserId())
-	if err != nil {
-		log.Printf("failed to generate token %v", err)
-		return
-	}
-
 	payload := &pb.UserLoginResponse{
-		Token: token,
+		Token: grpcResp.GetToken(),
 	}
 
 	utils.ResponseOk(w, payload)
