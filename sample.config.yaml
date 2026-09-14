@@ -1,0 +1,9 @@
+server:
+  host: "localhost"
+  port: "8200"
+  env: "dev"
+
+jwt_secret_key: "secret_key"
+
+services_url:
+  user_url: "localhost:50051"

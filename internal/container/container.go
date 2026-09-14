@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/rdev-org/api-gateway/internal/config"
 	"github.com/rdev-org/api-gateway/internal/router"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -16,7 +17,12 @@ type AppContainer struct {
 }
 
 func NewContainer() (*AppContainer, *chi.Mux) {
-	userServiceAddr := "localhost:50051"
+	appConfig, err := config.LoadConfig("config.yaml")
+	if err != nil {
+		log.Fatalf("failed to load config %v", err)
+	}
+
+	userServiceAddr := appConfig.Services.User
 	userConn, err := grpc.NewClient(userServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to user service: %v", err)

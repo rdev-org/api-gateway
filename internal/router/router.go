@@ -35,8 +35,8 @@ func (rt *Router) SetAllRoutes() *chi.Mux {
 func (rt *Router) SetUserRoutes(r chi.Router) {
 	userHandler := users.NewUserHandler(rt.UserClient)
 
-	// public routes
 	r.Group(func(r chi.Router) {
 		r.Post("/login", userHandler.Login)
+		r.Post("/register", userHandler.Register)
 	})
 }
