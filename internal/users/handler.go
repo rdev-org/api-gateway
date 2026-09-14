@@ -1,10 +1,10 @@
-package handler
+package users
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"github.com/rdev-org/api-gateway/internal/utils"
 	pb "github.com/rdev-org/proto-contracts/pb/user"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,15 +18,6 @@ func NewUserHandler(userClient pb.UserServiceClient) *UserHandler {
 	return &UserHandler{
 		userClient: userClient,
 	}
-}
-
-type LoginRequestDTO struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type LoginResponseDTO struct {
-	Token string `json:"token"`
 }
 
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -46,27 +37,34 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Password: reqDTO.Password,
 	})
 
-	fmt.Println("ERROR: ", err)
+	if err := getError(err, w); err != nil {
+		return
+	}
 
+	payload := LoginResponseDTO{
+		Token:    grpcResp.GetToken(),
+		Username: grpcResp.GetUsername(),
+	}
+
+	utils.ResponseOk(w, payload)
+}
+
+func getError(err error, w http.ResponseWriter) error {
 	if err != nil {
 		st, ok := status.FromError(err)
 		if ok {
 			switch st.Code() {
-			case codes.Unauthenticated:
-				http.Error(w, st.Message(), http.StatusUnauthorized)
-				return
 			case codes.InvalidArgument:
 				http.Error(w, st.Message(), http.StatusBadRequest)
-				return
+				return err
+			case codes.Unauthenticated:
+				http.Error(w, st.Message(), http.StatusUnauthorized)
+				return err
 			}
 		}
 		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
+		return err
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(LoginResponseDTO{
-		Token: grpcResp.GetToken(),
-	})
+	return err
 }

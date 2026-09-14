@@ -4,7 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/rdev-org/api-gateway/internal/handler"
+	"github.com/rdev-org/api-gateway/internal/users"
 	pbUser "github.com/rdev-org/proto-contracts/pb/user"
 )
 
@@ -33,7 +33,7 @@ func (rt *Router) SetAllRoutes() *chi.Mux {
 }
 
 func (rt *Router) SetUserRoutes(r chi.Router) {
-	userHandler := handler.NewUserHandler(rt.UserClient)
+	userHandler := users.NewUserHandler(rt.UserClient)
 
 	// public routes
 	r.Group(func(r chi.Router) {
