@@ -10,12 +10,12 @@ import (
 )
 
 type UserHandler struct {
-	userClient pb.UserServiceClient
+	client pb.UserServiceClient
 }
 
-func NewUserHandler(userClient pb.UserServiceClient) *UserHandler {
+func NewUserHandler(client pb.UserServiceClient) *UserHandler {
 	return &UserHandler{
-		userClient: userClient,
+		client: client,
 	}
 }
 
@@ -31,7 +31,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	grpcResp, err := h.userClient.Login(r.Context(), &pb.UserLoginRequest{
+	grpcResp, err := h.client.Login(r.Context(), &pb.UserLoginRequest{
 		Username: reqDTO.Username,
 		Password: reqDTO.Password,
 	})
@@ -42,11 +42,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload := &pb.UserLoginResponse{
-		Token: grpcResp.GetToken(),
-	}
-
-	utils.ResponseOk(w, payload)
+	utils.ResponseOk(w, grpcResp)
 }
 
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +57,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	grpcResp, err := h.userClient.Register(r.Context(), &pb.UserRegisterRequest{
+	grpcResp, err := h.client.Register(r.Context(), &pb.UserRegisterRequest{
 		Username:     reqDTO.Username,
 		Email:        reqDTO.Email,
 		PasswordHash: reqDTO.PasswordHash,

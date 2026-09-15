@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	pbUser "github.com/rdev-org/proto-contracts/pb/user"
+	pbUserAddress "github.com/rdev-org/proto-contracts/pb/user_address"
 )
 
 type AppContainer struct {
@@ -25,7 +26,12 @@ func NewContainer(servicesURL config.ServicesURL) *AppContainer {
 	}
 
 	userClient := pbUser.NewUserServiceClient(userConn)
-	r := router.NewRouter(userClient)
+	userAddressClient := pbUserAddress.NewUserAddressServiceClient(userConn)
+
+	r := router.NewRouter(
+		userClient,
+		userAddressClient,
+	)
 
 	return &AppContainer{
 		Routes:   r.SetAllRoutes(),
