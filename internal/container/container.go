@@ -13,16 +13,12 @@ import (
 )
 
 type AppContainer struct {
+	Routes   *chi.Mux
 	UserConn *grpc.ClientConn
 }
 
-func NewContainer() (*AppContainer, *chi.Mux) {
-	appConfig, err := config.LoadConfig("config.yaml")
-	if err != nil {
-		log.Fatalf("failed to load config %v", err)
-	}
-
-	userServiceAddr := appConfig.Services.User
+func NewContainer(servicesURL config.ServicesURL) *AppContainer {
+	userServiceAddr := servicesURL.User
 	userConn, err := grpc.NewClient(userServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to user service: %v", err)
@@ -31,9 +27,8 @@ func NewContainer() (*AppContainer, *chi.Mux) {
 	userClient := pbUser.NewUserServiceClient(userConn)
 	r := router.NewRouter(userClient)
 
-	appContainer := &AppContainer{
+	return &AppContainer{
+		Routes:   r.SetAllRoutes(),
 		UserConn: userConn,
 	}
-
-	return appContainer, r.SetAllRoutes()
 }

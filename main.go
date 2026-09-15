@@ -20,13 +20,13 @@ func main() {
 		log.Fatalf("failed to load config %v", err)
 	}
 
-	appContainer, routes := container.NewContainer()
+	appContainer := container.NewContainer(appConfig.Services)
 	defer appContainer.UserConn.Close()
 
 	addr := fmt.Sprintf("%s:%s", appConfig.Server.Host, appConfig.Server.Port)
 	srv := &http.Server{
 		Addr:    addr,
-		Handler: routes,
+		Handler: appContainer.Routes,
 	}
 
 	go func() {
