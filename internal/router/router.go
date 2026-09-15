@@ -49,7 +49,13 @@ func (rt *Router) SetUserRoutes(r chi.Router) {
 func (rt *Router) SetUserAddressRoutes(r chi.Router) {
 	h := user_addresses.NewUserAddressHandler(rt.UserAddressClient)
 
-	r.Get("/{uuid}/address", h.GetAddress)
-	r.Get("/address", h.GetAllAddress)
-	r.Post("/address", h.CreateAddress)
+	r.Route("/user_address", func(grpRoute chi.Router) {
+		// Authentication
+		grpRoute.Get("/{uuid}", h.GetAddress)
+		grpRoute.Get("/", h.GetAllAddress)
+		grpRoute.Post("/", h.CreateAddress)
+		grpRoute.Put("/{uuid}", h.UpdateAddress)
+		grpRoute.Delete("/{uuid}", h.DeleteAddress)
+		grpRoute.Get("/{uuid}/default", h.SetDefaultAddress)
+	})
 }

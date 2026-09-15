@@ -17,6 +17,7 @@ type Filter struct {
 }
 
 func (f *Filter) SanitizeFilter(cols []string) Filter {
+	search := f.Query.Get("search")
 	pageSizeInt, _ := strconv.Atoi(f.Query.Get("page_size"))
 	pageSize := pageSizeInt
 	if pageSize <= 0 {
@@ -26,8 +27,8 @@ func (f *Filter) SanitizeFilter(cols []string) Filter {
 	pageInt, _ := strconv.Atoi(f.Query.Get("page"))
 	page := (pageInt - 1) * pageSize
 
-	if f.Search != "" {
-		cleanSpaces := strings.TrimSpace(f.Query.Get("search"))
+	if search != "" {
+		cleanSpaces := strings.TrimSpace(search)
 		f.Search = cleanSpaces
 	}
 
