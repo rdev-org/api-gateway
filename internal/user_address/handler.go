@@ -1,4 +1,4 @@
-package user_addresses
+package user_address
 
 import (
 	"encoding/json"
@@ -8,16 +8,17 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/rdev-org/api-gateway/internal/shared"
 	"github.com/rdev-org/api-gateway/internal/utils"
+	pbCommon "github.com/rdev-org/proto-contracts/pb/common"
 	pb "github.com/rdev-org/proto-contracts/pb/user_address"
 )
 
 type UserAddressHandler struct {
-	client pb.UserAddressServiceClient
+	c pb.UserAddressServiceClient
 }
 
-func NewUserAddressHandler(client pb.UserAddressServiceClient) *UserAddressHandler {
+func NewUserAddressHandler(c pb.UserAddressServiceClient) *UserAddressHandler {
 	return &UserAddressHandler{
-		client: client,
+		c: c,
 	}
 }
 
@@ -29,7 +30,7 @@ func (h *UserAddressHandler) GetAddress(w http.ResponseWriter, r *http.Request) 
 
 	uuid := chi.URLParam(r, "uuid")
 
-	grpcResp, err := h.client.GetAddress(r.Context(), &pb.GetAddressRequest{
+	grpcResp, err := h.c.GetAddress(r.Context(), &pb.GetAddressRequest{
 		Uuid: uuid,
 	})
 
@@ -42,7 +43,7 @@ func (h *UserAddressHandler) GetAddress(w http.ResponseWriter, r *http.Request) 
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserAddressHandler) GetAllAddress(w http.ResponseWriter, r *http.Request) {
+func (h *UserAddressHandler) ListAddress(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -59,12 +60,12 @@ func (h *UserAddressHandler) GetAllAddress(w http.ResponseWriter, r *http.Reques
 		"address_type",
 	})
 
-	grpcResp, err := h.client.GetAllAddress(r.Context(), &pb.GetAllAddressRequest{
-		Filter: &pb.AddressFilter{
+	grpcResp, err := h.c.ListAddress(r.Context(), &pb.ListAddressRequest{
+		Filter: &pbCommon.Filter{
 			Sort:   filter.Sort,
 			Search: filter.Search,
 		},
-		Pagination: &pb.PaginationRequest{
+		Pagination: &pbCommon.PaginationRequest{
 			PageSize: int64(filter.PageSize),
 			Page:     int64(filter.Page),
 		},
@@ -91,7 +92,7 @@ func (h *UserAddressHandler) CreateAddress(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	grpcResp, err := h.client.CreateAddress(r.Context(), &pb.CreateAddressRequest{
+	grpcResp, err := h.c.CreateAddress(r.Context(), &pb.CreateAddressRequest{
 		Address: &pb.Address{
 			UserId:        reqDTO.UserID,
 			AddressLine1:  reqDTO.AddressLine1,
@@ -111,7 +112,7 @@ func (h *UserAddressHandler) CreateAddress(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	utils.ResponseOk(w, map[string]string{"uuid": grpcResp.GetAddress().GetUuid()})
+	utils.ResponseOk(w, map[string]string{"uuid": grpcResp.GetAddress().GetMeta().GetUuid()})
 }
 
 func (h *UserAddressHandler) UpdateAddress(w http.ResponseWriter, r *http.Request) {
@@ -127,7 +128,7 @@ func (h *UserAddressHandler) UpdateAddress(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	grpcResp, err := h.client.UpdateAddress(r.Context(), &pb.UpdateAddressRequest{
+	grpcResp, err := h.c.UpdateAddress(r.Context(), &pb.UpdateAddressRequest{
 		Address: &pb.Address{
 			UserId:        reqDTO.UserID,
 			AddressLine1:  reqDTO.AddressLine1,
@@ -138,7 +139,9 @@ func (h *UserAddressHandler) UpdateAddress(w http.ResponseWriter, r *http.Reques
 			Country:       reqDTO.Country,
 			IsDefault:     reqDTO.IsDefault,
 			AddressType:   reqDTO.AddressType,
-			Uuid:          uuid,
+			Meta: &pbCommon.Metadata{
+				Uuid: uuid,
+			},
 		},
 	})
 
@@ -148,7 +151,7 @@ func (h *UserAddressHandler) UpdateAddress(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	utils.ResponseOk(w, map[string]string{"uuid": grpcResp.GetAddress().GetUuid()})
+	utils.ResponseOk(w, map[string]string{"uuid": grpcResp.GetAddress().GetMeta().GetUuid()})
 }
 
 func (h *UserAddressHandler) DeleteAddress(w http.ResponseWriter, r *http.Request) {
@@ -158,7 +161,7 @@ func (h *UserAddressHandler) DeleteAddress(w http.ResponseWriter, r *http.Reques
 	}
 
 	uuid := chi.URLParam(r, "uuid")
-	grpcResp, err := h.client.DeleteAddress(r.Context(), &pb.DeleteAddressRequest{
+	grpcResp, err := h.c.DeleteAddress(r.Context(), &pb.DeleteAddressRequest{
 		Uuid: uuid,
 	})
 
@@ -171,15 +174,15 @@ func (h *UserAddressHandler) DeleteAddress(w http.ResponseWriter, r *http.Reques
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserAddressHandler) SetDefaultAddress(w http.ResponseWriter, r *http.Request) {
+func (h *UserAddressHandler) DefaultAddress(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
 
-	user_id := r.Header.Get("x-user-id")
+	user_id := r.Header.Get("X-User-Id")
 	uuid := chi.URLParam(r, "uuid")
-	grpcResp, err := h.client.SetDefaultAddress(r.Context(), &pb.SetDefaultAddressRequest{
+	grpcResp, err := h.c.DefaultAddress(r.Context(), &pb.DefaultAddressRequest{
 		UserId: user_id,
 		Uuid:   uuid,
 	})
@@ -190,5 +193,5 @@ func (h *UserAddressHandler) SetDefaultAddress(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	utils.ResponseOk(w, map[string]string{"uuid": grpcResp.GetAddress().GetUuid()})
+	utils.ResponseOk(w, map[string]string{"uuid": grpcResp.GetAddress().GetMeta().GetUuid()})
 }

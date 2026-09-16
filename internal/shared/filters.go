@@ -8,12 +8,13 @@ import (
 
 type Filter struct {
 	Query    url.Values
-	UserId   string `json:"user_id"`
 	Page     int    `json:"page" query:"page"`
 	PageSize int    `json:"page_size" query:"page_size"`
 	Sort     string `json:"sort" query:"sort"`
-	Status   string `json:"status" query:"status"`
 	Search   string `json:"search" query:"search"`
+
+	UserId string `json:"user_id"`
+	Status string `json:"status" query:"status"`
 }
 
 func (f *Filter) SanitizeFilter(cols []string) Filter {

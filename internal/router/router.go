@@ -4,21 +4,30 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/rdev-org/api-gateway/internal/user_addresses"
-	"github.com/rdev-org/api-gateway/internal/users"
-	pbUser "github.com/rdev-org/proto-contracts/pb/user"
-	pbUserAddress "github.com/rdev-org/proto-contracts/pb/user_address"
+	"github.com/rdev-org/api-gateway/internal/user_address"
+	"github.com/rdev-org/api-gateway/internal/user_credential"
+	"github.com/rdev-org/api-gateway/internal/user_profile"
+
+	pbAddress "github.com/rdev-org/proto-contracts/pb/user_address"
+	pbCredential "github.com/rdev-org/proto-contracts/pb/user_credential"
+	pbProfile "github.com/rdev-org/proto-contracts/pb/user_profile"
 )
 
 type Router struct {
-	UserClient        pbUser.UserServiceClient
-	UserAddressClient pbUserAddress.UserAddressServiceClient
+	Credential pbCredential.UserCredentialServiceClient
+	Profile    pbProfile.UserProfileServiceClient
+	Address    pbAddress.UserAddressServiceClient
 }
 
-func NewRouter(userClient pbUser.UserServiceClient, userAddressClient pbUserAddress.UserAddressServiceClient) *Router {
+func NewRouter(
+	credential pbCredential.UserCredentialServiceClient,
+	profile pbProfile.UserProfileServiceClient,
+	address pbAddress.UserAddressServiceClient,
+) *Router {
 	return &Router{
-		UserClient:        userClient,
-		UserAddressClient: userAddressClient,
+		Credential: credential,
+		Profile:    profile,
+		Address:    address,
 	}
 }
 
@@ -30,32 +39,49 @@ func (rt *Router) SetAllRoutes() *chi.Mux {
 	r.Use(middleware.Heartbeat("/health"))
 
 	r.Route("/api/v1", func(subRouter chi.Router) {
-		rt.SetUserRoutes(subRouter)
+		rt.SetUserCredentialRoutes(subRouter)
+		rt.SetUserProfileRoutes(subRouter)
 		rt.SetUserAddressRoutes(subRouter)
 	})
 
 	return r
 }
 
-func (rt *Router) SetUserRoutes(r chi.Router) {
-	h := users.NewUserHandler(rt.UserClient)
+func (rt *Router) SetUserCredentialRoutes(r chi.Router) {
+	h := user_credential.NewUserCredentialHandler(rt.Credential)
 
-	r.Group(func(r chi.Router) {
-		r.Post("/login", h.Login)
-		r.Post("/register", h.Register)
+	r.Post("/login", h.Login)
+	r.Post("/register", h.Register)
+
+	r.Group(func(subRouter chi.Router) {
+		subRouter.Delete("/delete", h.DeleteCredential)
+		subRouter.Post("/update_password", h.UpdatePassword)
+		subRouter.Post("/reset_password", h.ResetPassword)
+	})
+}
+
+func (rt *Router) SetUserProfileRoutes(r chi.Router) {
+	h := user_profile.NewUserProfileHandler(rt.Profile)
+
+	r.Get("/profile", h.GetProfile)
+
+	r.Route("/user_profile", func(subRouter chi.Router) {
+		subRouter.Get("/list", h.ListProfile)
+		subRouter.Post("/create", h.CreateProfile)
+		subRouter.Put("/{uuid}/update", h.UpdateProfile)
+		subRouter.Delete("/{uuid}/delete", h.DeleteProfile)
 	})
 }
 
 func (rt *Router) SetUserAddressRoutes(r chi.Router) {
-	h := user_addresses.NewUserAddressHandler(rt.UserAddressClient)
+	h := user_address.NewUserAddressHandler(rt.Address)
 
-	r.Route("/user_address", func(grpRoute chi.Router) {
-		// Authentication
-		grpRoute.Get("/{uuid}", h.GetAddress)
-		grpRoute.Get("/", h.GetAllAddress)
-		grpRoute.Post("/", h.CreateAddress)
-		grpRoute.Put("/{uuid}", h.UpdateAddress)
-		grpRoute.Delete("/{uuid}", h.DeleteAddress)
-		grpRoute.Get("/{uuid}/default", h.SetDefaultAddress)
+	r.Route("/user_address", func(subRouter chi.Router) {
+		subRouter.Get("/{uuid}", h.GetAddress)
+		subRouter.Get("/list", h.ListAddress)
+		subRouter.Post("/create", h.CreateAddress)
+		subRouter.Put("/{uuid}/update", h.UpdateAddress)
+		subRouter.Delete("/{uuid}/delete", h.DeleteAddress)
+		subRouter.Get("/{uuid}/default", h.DefaultAddress)
 	})
 }

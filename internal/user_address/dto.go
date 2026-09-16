@@ -1,4 +1,4 @@
-package user_addresses
+package user_address
 
 type UserAddressRequestDTO struct {
 	UserID        string `json:"user_id"`

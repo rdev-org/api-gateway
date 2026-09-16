@@ -9,14 +9,16 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pbUser "github.com/rdev-org/proto-contracts/pb/user"
-	pbUserAddress "github.com/rdev-org/proto-contracts/pb/user_address"
+	pbAddress "github.com/rdev-org/proto-contracts/pb/user_address"
+	pbCredential "github.com/rdev-org/proto-contracts/pb/user_credential"
+	pbProfile "github.com/rdev-org/proto-contracts/pb/user_profile"
 )
 
 type UserServiceContainer struct {
-	conn        *grpc.ClientConn
-	user        pbUser.UserServiceClient
-	userAddress pbUserAddress.UserAddressServiceClient
+	conn       *grpc.ClientConn
+	credential pbCredential.UserCredentialServiceClient
+	profile    pbProfile.UserProfileServiceClient
+	address    pbAddress.UserAddressServiceClient
 }
 
 type AppContainer struct {
@@ -31,8 +33,9 @@ func NewContainer(servicesURL config.ServicesURL) *AppContainer {
 	}
 
 	r := router.NewRouter(
-		userClient.user,
-		userClient.userAddress,
+		userClient.credential,
+		userClient.profile,
+		userClient.address,
 	)
 
 	return &AppContainer{
@@ -47,12 +50,14 @@ func setUserService(url string) (UserServiceContainer, error) {
 		log.Fatalf("failed to connect to user service: %v", err)
 	}
 
-	userClient := pbUser.NewUserServiceClient(conn)
-	userAddressClient := pbUserAddress.NewUserAddressServiceClient(conn)
+	credential := pbCredential.NewUserCredentialServiceClient(conn)
+	profile := pbProfile.NewUserProfileServiceClient(conn)
+	address := pbAddress.NewUserAddressServiceClient(conn)
 
 	return UserServiceContainer{
-		conn:        conn,
-		user:        userClient,
-		userAddress: userAddressClient,
+		conn:       conn,
+		credential: credential,
+		profile:    profile,
+		address:    address,
 	}, err
 }
