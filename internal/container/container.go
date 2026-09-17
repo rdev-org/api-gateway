@@ -11,6 +11,7 @@ import (
 
 	pbAddress "github.com/rdev-org/proto-contracts/pb/user_address"
 	pbCredential "github.com/rdev-org/proto-contracts/pb/user_credential"
+	pbPreference "github.com/rdev-org/proto-contracts/pb/user_preference"
 	pbProfile "github.com/rdev-org/proto-contracts/pb/user_profile"
 )
 
@@ -19,6 +20,7 @@ type UserServiceContainer struct {
 	credential pbCredential.UserCredentialServiceClient
 	profile    pbProfile.UserProfileServiceClient
 	address    pbAddress.UserAddressServiceClient
+	preference pbPreference.UserPreferenceServiceClient
 }
 
 type AppContainer struct {
@@ -36,6 +38,7 @@ func NewContainer(servicesURL config.ServicesURL) *AppContainer {
 		userClient.credential,
 		userClient.profile,
 		userClient.address,
+		userClient.preference,
 	)
 
 	return &AppContainer{
@@ -53,11 +56,13 @@ func setUserService(url string) (UserServiceContainer, error) {
 	credential := pbCredential.NewUserCredentialServiceClient(conn)
 	profile := pbProfile.NewUserProfileServiceClient(conn)
 	address := pbAddress.NewUserAddressServiceClient(conn)
+	preference := pbPreference.NewUserPreferenceServiceClient(conn)
 
 	return UserServiceContainer{
 		conn:       conn,
 		credential: credential,
 		profile:    profile,
 		address:    address,
+		preference: preference,
 	}, err
 }

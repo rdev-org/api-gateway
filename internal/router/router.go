@@ -6,10 +6,12 @@ import (
 
 	"github.com/rdev-org/api-gateway/internal/user_address"
 	"github.com/rdev-org/api-gateway/internal/user_credential"
+	"github.com/rdev-org/api-gateway/internal/user_preference"
 	"github.com/rdev-org/api-gateway/internal/user_profile"
 
 	pbAddress "github.com/rdev-org/proto-contracts/pb/user_address"
 	pbCredential "github.com/rdev-org/proto-contracts/pb/user_credential"
+	pbPreference "github.com/rdev-org/proto-contracts/pb/user_preference"
 	pbProfile "github.com/rdev-org/proto-contracts/pb/user_profile"
 )
 
@@ -17,17 +19,20 @@ type Router struct {
 	Credential pbCredential.UserCredentialServiceClient
 	Profile    pbProfile.UserProfileServiceClient
 	Address    pbAddress.UserAddressServiceClient
+	Preference pbPreference.UserPreferenceServiceClient
 }
 
 func NewRouter(
 	credential pbCredential.UserCredentialServiceClient,
 	profile pbProfile.UserProfileServiceClient,
 	address pbAddress.UserAddressServiceClient,
+	preference pbPreference.UserPreferenceServiceClient,
 ) *Router {
 	return &Router{
 		Credential: credential,
 		Profile:    profile,
 		Address:    address,
+		Preference: preference,
 	}
 }
 
@@ -83,5 +88,17 @@ func (rt *Router) SetUserAddressRoutes(r chi.Router) {
 		subRouter.Put("/{uuid}/update", h.UpdateAddress)
 		subRouter.Delete("/{uuid}/delete", h.DeleteAddress)
 		subRouter.Get("/{uuid}/default", h.DefaultAddress)
+	})
+}
+
+func (rt *Router) SetUserPreferenceRoutes(r chi.Router) {
+	h := user_preference.NewUserPreferenceHandler(rt.Preference)
+
+	r.Route("/user_profile", func(subRouter chi.Router) {
+		subRouter.Get("/{uuid}", h.GetPreference)
+		subRouter.Get("/list", h.ListPreference)
+		subRouter.Post("/create", h.CreatePreference)
+		subRouter.Put("/{uuid}/update", h.UpdatePreference)
+		subRouter.Delete("/{uuid}/delete", h.DeletePreference)
 	})
 }
