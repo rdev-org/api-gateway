@@ -1,7 +1,6 @@
 package user_address
 
 type UserAddressRequestDTO struct {
-	UserID        string `json:"user_id"`
 	AddressLine1  string `json:"address_line1"`
 	AddressLine2  string `json:"address_line2,omitempty"`
 	City          string `json:"city"`

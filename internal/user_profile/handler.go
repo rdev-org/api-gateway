@@ -85,10 +85,10 @@ func (h *UserProfileHandler) CreateProfile(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	uuid := r.Header.Get("X-User-Id")
+	user_id := r.Header.Get("X-User-Id")
 	grpcResp, err := h.c.CreateProfile(r.Context(), &pb.CreateProfileRequest{
-		Uuid: uuid,
 		Profile: &pb.Profile{
+			UserId:       user_id,
 			FirstName:    reqDTO.FirstName,
 			MiddleName:   reqDTO.MiddleName,
 			LastName:     reqDTO.LastName,

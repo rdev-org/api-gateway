@@ -92,9 +92,10 @@ func (h *UserAddressHandler) CreateAddress(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	user_id := r.Header.Get("X-User-Id")
 	grpcResp, err := h.c.CreateAddress(r.Context(), &pb.CreateAddressRequest{
 		Address: &pb.Address{
-			UserId:        reqDTO.UserID,
+			UserId:        user_id,
 			AddressLine1:  reqDTO.AddressLine1,
 			AddressLine2:  reqDTO.AddressLine2,
 			City:          reqDTO.City,
@@ -121,16 +122,18 @@ func (h *UserAddressHandler) UpdateAddress(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	uuid := chi.URLParam(r, "uuid")
 	var reqDTO UserAddressRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&reqDTO); err != nil {
 		utils.ResponseError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
+	uuid := chi.URLParam(r, "uuid")
+	user_id := r.Header.Get("X-User-Id")
 	grpcResp, err := h.c.UpdateAddress(r.Context(), &pb.UpdateAddressRequest{
+		Uuid: uuid,
 		Address: &pb.Address{
-			UserId:        reqDTO.UserID,
+			UserId:        user_id,
 			AddressLine1:  reqDTO.AddressLine1,
 			AddressLine2:  reqDTO.AddressLine2,
 			City:          reqDTO.City,
@@ -139,9 +142,6 @@ func (h *UserAddressHandler) UpdateAddress(w http.ResponseWriter, r *http.Reques
 			Country:       reqDTO.Country,
 			IsDefault:     reqDTO.IsDefault,
 			AddressType:   reqDTO.AddressType,
-			Meta: &pbCommon.Metadata{
-				Uuid: uuid,
-			},
 		},
 	})
 
@@ -193,5 +193,5 @@ func (h *UserAddressHandler) DefaultAddress(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	utils.ResponseOk(w, map[string]string{"uuid": grpcResp.GetAddress().GetMeta().GetUuid()})
+	utils.ResponseOk(w, grpcResp)
 }
