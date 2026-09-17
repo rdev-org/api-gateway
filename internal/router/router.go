@@ -54,7 +54,7 @@ func (rt *Router) SetUserCredentialRoutes(r chi.Router) {
 	r.Post("/register", h.Register)
 
 	r.Group(func(subRouter chi.Router) {
-		subRouter.Delete("/delete", h.DeleteCredential)
+		subRouter.Delete("/{uuid}/delete", h.DeleteCredential)
 		subRouter.Post("/update_password", h.UpdatePassword)
 		subRouter.Post("/reset_password", h.ResetPassword)
 	})

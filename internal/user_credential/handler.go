@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/rdev-org/api-gateway/internal/utils"
 	pb "github.com/rdev-org/proto-contracts/pb/user_credential"
 )
@@ -69,11 +70,26 @@ func (h *UserCredentialHandler) Register(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	utils.ResponseCreated(w, map[string]string{"message": grpcResp.GetMessage()})
+	utils.ResponseCreated(w, grpcResp)
 }
 
 func (h *UserCredentialHandler) DeleteCredential(w http.ResponseWriter, r *http.Request) {
-	//
+	if r.Method != http.MethodDelete {
+		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	uuid := chi.URLParam(r, "uuid")
+	grpcResp, err := h.c.DeleteCredential(r.Context(), &pb.DeleteCredentialRequest{
+		Uuid: uuid,
+	})
+
+	utils.GetStatusFromError(err, w)
+	if err != nil {
+		return
+	}
+
+	utils.ResponseOk(w, grpcResp)
 }
 
 func (h *UserCredentialHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +115,7 @@ func (h *UserCredentialHandler) UpdatePassword(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	utils.ResponseCreated(w, map[string]string{"message": grpcResp.GetMessage()})
+	utils.ResponseCreated(w, grpcResp)
 }
 
 func (h *UserCredentialHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
@@ -129,5 +145,5 @@ func (h *UserCredentialHandler) ResetPassword(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	utils.ResponseCreated(w, map[string]string{"message": grpcResp.GetMessage()})
+	utils.ResponseCreated(w, grpcResp)
 }
