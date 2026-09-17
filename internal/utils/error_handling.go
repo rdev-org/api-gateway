@@ -18,6 +18,9 @@ func GetStatusFromError(err error, w http.ResponseWriter) {
 			case codes.Unauthenticated:
 				ResponseError(w, http.StatusUnauthorized, st.Message())
 				return
+			case codes.Internal:
+				ResponseError(w, http.StatusInternalServerError, st.Message())
+				return
 			}
 		}
 

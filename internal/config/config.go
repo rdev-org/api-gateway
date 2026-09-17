@@ -21,7 +21,8 @@ type (
 	}
 
 	ServicesURL struct {
-		User string `yaml:"user_url"`
+		User         string `yaml:"user_url"`
+		Notification string `yaml:"notification_url"`
 	}
 )
 

@@ -23,6 +23,10 @@ type UserServiceContainer struct {
 	preference pbPreference.UserPreferenceServiceClient
 }
 
+type NotificationService struct {
+	conn *grpc.ClientConn
+}
+
 type AppContainer struct {
 	Routes   *chi.Mux
 	UserConn *grpc.ClientConn
@@ -34,12 +38,12 @@ func NewContainer(servicesURL config.ServicesURL) *AppContainer {
 		log.Fatalf("failed to set user client %v", err)
 	}
 
-	r := router.NewRouter(
-		userClient.credential,
-		userClient.profile,
-		userClient.address,
-		userClient.preference,
-	)
+	r := router.NewRouter(router.Router{
+		Credential: userClient.credential,
+		Profile:    userClient.profile,
+		Address:    userClient.address,
+		Preference: userClient.preference,
+	})
 
 	return &AppContainer{
 		Routes:   r.SetAllRoutes(),

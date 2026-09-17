@@ -20,3 +20,7 @@ type RegisterRequestDTO struct {
 type PasswordRequestDTO struct {
 	Password string `json:"password"`
 }
+
+type ForgotPasswordRequestDTO struct {
+	Email string `json:"email"`
+}

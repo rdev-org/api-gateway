@@ -22,17 +22,12 @@ type Router struct {
 	Preference pbPreference.UserPreferenceServiceClient
 }
 
-func NewRouter(
-	credential pbCredential.UserCredentialServiceClient,
-	profile pbProfile.UserProfileServiceClient,
-	address pbAddress.UserAddressServiceClient,
-	preference pbPreference.UserPreferenceServiceClient,
-) *Router {
+func NewRouter(r Router) *Router {
 	return &Router{
-		Credential: credential,
-		Profile:    profile,
-		Address:    address,
-		Preference: preference,
+		Credential: r.Credential,
+		Profile:    r.Profile,
+		Address:    r.Address,
+		Preference: r.Preference,
 	}
 }
 
@@ -47,6 +42,7 @@ func (rt *Router) SetAllRoutes() *chi.Mux {
 		rt.SetUserCredentialRoutes(subRouter)
 		rt.SetUserProfileRoutes(subRouter)
 		rt.SetUserAddressRoutes(subRouter)
+		rt.SetUserPreferenceRoutes(subRouter)
 	})
 
 	return r
@@ -57,6 +53,7 @@ func (rt *Router) SetUserCredentialRoutes(r chi.Router) {
 
 	r.Post("/login", h.Login)
 	r.Post("/register", h.Register)
+	r.Post("/forget_password", h.ForgotPassword)
 
 	r.Group(func(subRouter chi.Router) {
 		subRouter.Delete("/{uuid}/delete", h.DeleteCredential)
@@ -94,7 +91,7 @@ func (rt *Router) SetUserAddressRoutes(r chi.Router) {
 func (rt *Router) SetUserPreferenceRoutes(r chi.Router) {
 	h := user_preference.NewUserPreferenceHandler(rt.Preference)
 
-	r.Route("/user_profile", func(subRouter chi.Router) {
+	r.Route("/user_preference", func(subRouter chi.Router) {
 		subRouter.Get("/{uuid}", h.GetPreference)
 		subRouter.Get("/list", h.ListPreference)
 		subRouter.Post("/create", h.CreatePreference)

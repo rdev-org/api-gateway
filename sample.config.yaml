@@ -7,3 +7,4 @@ jwt_secret_key: "secret_key"
 
 services_url:
   user_url: "localhost:50051"
+  notification_url: "localhost:50052"

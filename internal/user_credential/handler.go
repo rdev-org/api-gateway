@@ -147,3 +147,27 @@ func (h *UserCredentialHandler) ResetPassword(w http.ResponseWriter, r *http.Req
 
 	utils.ResponseCreated(w, grpcResp)
 }
+
+func (h *UserCredentialHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var reqDTO ForgotPasswordRequestDTO
+	if err := json.NewDecoder(r.Body).Decode(&reqDTO); err != nil {
+		utils.ResponseError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	grcpResp, err := h.c.ForgetPassword(r.Context(), &pb.ForgetPasswordRequest{
+		Email: reqDTO.Email,
+	})
+
+	utils.GetStatusFromError(err, w)
+	if err != nil {
+		return
+	}
+
+	utils.ResponseOk(w, grcpResp)
+}
