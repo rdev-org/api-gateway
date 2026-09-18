@@ -10,6 +10,7 @@ import (
 	"github.com/rdev-org/api-gateway/internal/utils"
 	pbCommon "github.com/rdev-org/proto-contracts/pb/common"
 	pb "github.com/rdev-org/proto-contracts/pb/user_preference"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type UserPreferenceHandler struct {
@@ -81,6 +82,16 @@ func (h *UserPreferenceHandler) CreatePreference(w http.ResponseWriter, r *http.
 		return
 	}
 
+	settingsAny := make(map[string]any, len(reqDTO.Settings))
+	for k, v := range reqDTO.Settings {
+		settingsAny[k] = v
+	}
+
+	settingsStruct, err := structpb.NewStruct(settingsAny)
+	if err != nil {
+		log.Printf("failed to convert settings to structpb: %v", err)
+	}
+
 	user_id := r.Header.Get("X-User-Id")
 	grpcResp, err := h.c.CreatePreference(r.Context(), &pb.CreatePreferenceRequest{
 		Preference: &pb.Preference{
@@ -89,6 +100,7 @@ func (h *UserPreferenceHandler) CreatePreference(w http.ResponseWriter, r *http.
 			Currency:   reqDTO.Currency,
 			EmailOptIn: reqDTO.EmailOptIn,
 			SmsOptIn:   reqDTO.SmsOptIn,
+			Settings:   settingsStruct,
 		},
 	})
 
@@ -115,6 +127,17 @@ func (h *UserPreferenceHandler) UpdatePreference(w http.ResponseWriter, r *http.
 
 	uuid := chi.URLParam(r, "uuid")
 	user_id := r.Header.Get("X-User-Id")
+
+	settingsAny := make(map[string]any, len(reqDTO.Settings))
+	for k, v := range reqDTO.Settings {
+		settingsAny[k] = v
+	}
+
+	settingsStruct, err := structpb.NewStruct(settingsAny)
+	if err != nil {
+		log.Printf("failed to convert settings to structpb: %v", err)
+	}
+
 	grpcResp, err := h.c.UpdatePreference(r.Context(), &pb.UpdatePreferenceRequest{
 		Uuid: uuid,
 		Preference: &pb.Preference{
@@ -123,6 +146,7 @@ func (h *UserPreferenceHandler) UpdatePreference(w http.ResponseWriter, r *http.
 			Currency:   reqDTO.Currency,
 			EmailOptIn: reqDTO.EmailOptIn,
 			SmsOptIn:   reqDTO.SmsOptIn,
+			Settings:   settingsStruct,
 		},
 	})
 
