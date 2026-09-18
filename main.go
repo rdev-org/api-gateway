@@ -20,8 +20,8 @@ func main() {
 		log.Fatalf("failed to load config %v", err)
 	}
 
-	appContainer := container.NewContainer(appConfig.Services)
-	defer appContainer.UserConn.Close()
+	appContainer := container.NewContainer(appConfig.Services, appConfig.Kafka)
+	defer appContainer.Close()
 
 	addr := fmt.Sprintf("%s:%s", appConfig.Server.Host, appConfig.Server.Port)
 	srv := &http.Server{

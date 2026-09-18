@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/rdev-org/api-gateway/internal/notification"
 	"github.com/rdev-org/api-gateway/internal/user_address"
 	"github.com/rdev-org/api-gateway/internal/user_credential"
 	"github.com/rdev-org/api-gateway/internal/user_preference"
@@ -16,18 +17,20 @@ import (
 )
 
 type Router struct {
-	Credential pbCredential.UserCredentialServiceClient
-	Profile    pbProfile.UserProfileServiceClient
-	Address    pbAddress.UserAddressServiceClient
-	Preference pbPreference.UserPreferenceServiceClient
+	Credential          pbCredential.UserCredentialServiceClient
+	Profile             pbProfile.UserProfileServiceClient
+	Address             pbAddress.UserAddressServiceClient
+	Preference          pbPreference.UserPreferenceServiceClient
+	NotificationHandler *notification.NotificationHandler
 }
 
 func NewRouter(r Router) *Router {
 	return &Router{
-		Credential: r.Credential,
-		Profile:    r.Profile,
-		Address:    r.Address,
-		Preference: r.Preference,
+		Credential:          r.Credential,
+		Profile:             r.Profile,
+		Address:             r.Address,
+		Preference:          r.Preference,
+		NotificationHandler: r.NotificationHandler,
 	}
 }
 
@@ -43,9 +46,16 @@ func (rt *Router) SetAllRoutes() *chi.Mux {
 		rt.SetUserProfileRoutes(subRouter)
 		rt.SetUserAddressRoutes(subRouter)
 		rt.SetUserPreferenceRoutes(subRouter)
+		rt.SetNotificationRoute(subRouter)
 	})
 
 	return r
+}
+
+func (rt *Router) SetNotificationRoute(r chi.Router) {
+	if rt.NotificationHandler != nil {
+		r.Get("/ws/notifications", rt.NotificationHandler.InAppNotification)
+	}
 }
 
 func (rt *Router) SetUserCredentialRoutes(r chi.Router) {

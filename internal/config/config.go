@@ -12,6 +12,7 @@ type (
 		Server       ServerConfig `yaml:"server"`
 		Services     ServicesURL  `yaml:"services_url"`
 		JWTSecretKey string       `yaml:"jwt_secret_key"`
+		Kafka        KafkaConfig  `yaml:"kafka"`
 	}
 
 	ServerConfig struct {
@@ -23,6 +24,12 @@ type (
 	ServicesURL struct {
 		User         string `yaml:"user_url"`
 		Notification string `yaml:"notification_url"`
+	}
+
+	KafkaConfig struct {
+		Brokers []string `yaml:"brokers"`
+		Topic   string   `yaml:"topic"`
+		GroupID string   `yaml:"group_id"`
 	}
 )
 

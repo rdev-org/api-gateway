@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rdev-org/api-gateway/internal/config"
+	"github.com/rdev-org/api-gateway/internal/notification"
 	"github.com/rdev-org/api-gateway/internal/router"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -27,27 +28,41 @@ type NotificationService struct {
 	conn *grpc.ClientConn
 }
 
-type AppContainer struct {
-	Routes   *chi.Mux
-	UserConn *grpc.ClientConn
+type Container struct {
+	Routes              *chi.Mux
+	UserConn            *grpc.ClientConn
+	NotificationHandler *notification.NotificationHandler
 }
 
-func NewContainer(servicesURL config.ServicesURL) *AppContainer {
+func NewContainer(servicesURL config.ServicesURL, ck config.KafkaConfig) *Container {
 	userClient, err := setUserService(servicesURL.User)
 	if err != nil {
 		log.Fatalf("failed to set user client %v", err)
 	}
 
+	notifHandler := notification.NewNotificationHandler(&ck)
+
 	r := router.NewRouter(router.Router{
-		Credential: userClient.credential,
-		Profile:    userClient.profile,
-		Address:    userClient.address,
-		Preference: userClient.preference,
+		Credential:          userClient.credential,
+		Profile:             userClient.profile,
+		Address:             userClient.address,
+		Preference:          userClient.preference,
+		NotificationHandler: notifHandler,
 	})
 
-	return &AppContainer{
-		Routes:   r.SetAllRoutes(),
-		UserConn: userClient.conn,
+	return &Container{
+		Routes:              r.SetAllRoutes(),
+		UserConn:            userClient.conn,
+		NotificationHandler: notifHandler,
+	}
+}
+
+func (c *Container) Close() {
+	if c.UserConn != nil {
+		c.UserConn.Close()
+	}
+	if c.NotificationHandler != nil {
+		c.NotificationHandler.Close()
 	}
 }
 
