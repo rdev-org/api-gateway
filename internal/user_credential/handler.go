@@ -6,7 +6,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/rdev-org/api-gateway/internal/shared"
 	"github.com/rdev-org/api-gateway/internal/utils"
+	pbCommon "github.com/rdev-org/proto-contracts/pb/common"
 	pb "github.com/rdev-org/proto-contracts/pb/user_credential"
 )
 
@@ -33,6 +35,10 @@ func (h *UserCredentialHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	grpcResp, err := h.c.Login(r.Context(), &pb.LoginRequest{
+		RequestContext: &pbCommon.RequestContext{
+			IpAddress: shared.GetClientIP(r),
+			UserAgent: r.UserAgent(),
+		},
 		Username: reqDTO.Username,
 		Password: reqDTO.Password,
 	})
