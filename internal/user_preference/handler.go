@@ -8,9 +8,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/rdev-org/api-gateway/internal/shared"
 	"github.com/rdev-org/api-gateway/internal/utils"
+	"github.com/rdev-org/helpers/structutil"
 	pbCommon "github.com/rdev-org/proto-contracts/pb/common"
 	pb "github.com/rdev-org/proto-contracts/pb/user_preference"
-	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type UserPreferenceHandler struct {
@@ -82,12 +82,7 @@ func (h *UserPreferenceHandler) CreatePreference(w http.ResponseWriter, r *http.
 		return
 	}
 
-	settingsAny := make(map[string]any, len(reqDTO.Settings))
-	for k, v := range reqDTO.Settings {
-		settingsAny[k] = v
-	}
-
-	settingsStruct, err := structpb.NewStruct(settingsAny)
+	settingsStruct, err := structutil.ToProtoStruct(reqDTO.Settings)
 	if err != nil {
 		log.Printf("failed to convert settings to structpb: %v", err)
 	}
@@ -128,12 +123,7 @@ func (h *UserPreferenceHandler) UpdatePreference(w http.ResponseWriter, r *http.
 	uuid := chi.URLParam(r, "uuid")
 	user_id := r.Header.Get("X-User-Id")
 
-	settingsAny := make(map[string]any, len(reqDTO.Settings))
-	for k, v := range reqDTO.Settings {
-		settingsAny[k] = v
-	}
-
-	settingsStruct, err := structpb.NewStruct(settingsAny)
+	settingsStruct, err := structutil.ToProtoStruct(reqDTO.Settings)
 	if err != nil {
 		log.Printf("failed to convert settings to structpb: %v", err)
 	}

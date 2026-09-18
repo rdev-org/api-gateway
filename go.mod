@@ -4,6 +4,7 @@ go 1.27.1
 
 require (
 	github.com/go-chi/chi/v5 v5.3.2
+	github.com/rdev-org/helpers v1.0.0
 	github.com/rdev-org/proto-contracts v1.0.0
 	go.yaml.in/yaml/v3 v3.0.5
 	google.golang.org/grpc v1.83.2
@@ -18,3 +19,5 @@ require (
 )
 
 replace github.com/rdev-org/proto-contracts => ../proto-contracts
+
+replace github.com/rdev-org/helpers => ../helpers
