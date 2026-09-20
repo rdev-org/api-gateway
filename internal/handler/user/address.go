@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/rdev-org/api-gateway/internal/dto"
 	"github.com/rdev-org/api-gateway/internal/shared"
 	"github.com/rdev-org/api-gateway/internal/utils"
 	pbCommon "github.com/rdev-org/proto-contracts/pb/common"
@@ -76,7 +77,7 @@ func (h *UserHandler) CreateAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reqDTO UserAddressRequestDTO
+	var reqDTO dto.AddressRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&reqDTO); err != nil {
 		utils.ResponseError(w, http.StatusBadRequest, "invalid request body")
 		return
@@ -112,7 +113,7 @@ func (h *UserHandler) UpdateAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reqDTO UserAddressRequestDTO
+	var reqDTO dto.AddressRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&reqDTO); err != nil {
 		utils.ResponseError(w, http.StatusBadRequest, "invalid request body")
 		return

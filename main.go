@@ -20,7 +20,10 @@ func main() {
 		log.Fatalf("failed to load config %v", err)
 	}
 
-	appContainer := container.NewContainer(appConfig.Services, appConfig.Kafka)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	appContainer := container.NewContainer(ctx, appConfig.Services, appConfig.Kafka)
 	defer appContainer.Close()
 
 	addr := fmt.Sprintf("%s:%s", appConfig.Server.Host, appConfig.Server.Port)

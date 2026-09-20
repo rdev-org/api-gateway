@@ -1,6 +1,7 @@
 package container
 
 import (
+	"context"
 	"log"
 
 	"github.com/go-chi/chi/v5"
@@ -20,23 +21,19 @@ type UserServiceContainer struct {
 	auth pbAuth.AuthenticationServiceClient
 }
 
-type NotificationService struct {
-	conn *grpc.ClientConn
-}
-
 type Container struct {
 	Routes              *chi.Mux
 	UserConn            *grpc.ClientConn
 	NotificationHandler *notification.NotificationHandler
 }
 
-func NewContainer(servicesURL config.ServicesURL, ck config.KafkaConfig) *Container {
+func NewContainer(ctx context.Context, servicesURL config.ServicesURL, ck config.KafkaConfig) *Container {
 	userClient, err := setUserService(servicesURL.User)
 	if err != nil {
 		log.Fatalf("failed to set user client %v", err)
 	}
 
-	notifHandler := notification.NewNotificationHandler(&ck)
+	notifHandler := notification.NewNotificationHandler(ctx, &ck)
 
 	r := router.NewRouter(router.Router{
 		User:                userClient.user,

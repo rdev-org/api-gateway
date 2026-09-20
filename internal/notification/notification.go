@@ -2,7 +2,6 @@ package notification
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -28,7 +27,7 @@ type NotificationHandler struct {
 	connManager *ConnectionManager
 }
 
-func NewNotificationHandler(c *config.KafkaConfig) *NotificationHandler {
+func NewNotificationHandler(ctx context.Context, c *config.KafkaConfig) *NotificationHandler {
 	h := &NotificationHandler{
 		kafkaReader: kafka.NewReader(kafka.ReaderConfig{
 			Brokers: c.Brokers,
@@ -40,7 +39,7 @@ func NewNotificationHandler(c *config.KafkaConfig) *NotificationHandler {
 		},
 	}
 
-	go h.consumeKafkaEvents(context.Background())
+	go h.consumeKafkaEvents(ctx)
 	return h
 }
 
@@ -90,9 +89,6 @@ func (h *NotificationHandler) consumeKafkaEvents(ctx context.Context) {
 		}
 
 		userID := "1"
-		fmt.Println()
-		fmt.Println("KAFKA READ: ", m.Topic, string(m.Value), string(m.Key))
-		fmt.Println()
 
 		h.connManager.mu.RLock()
 		conn, exists := h.connManager.connections[userID]

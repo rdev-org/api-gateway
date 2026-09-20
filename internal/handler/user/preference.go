@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/rdev-org/api-gateway/internal/dto"
 	"github.com/rdev-org/api-gateway/internal/shared"
 	"github.com/rdev-org/api-gateway/internal/utils"
 	"github.com/rdev-org/helpers/structutil"
@@ -67,7 +68,7 @@ func (h *UserHandler) CreatePreference(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reqDTO PreferenceRequestDTO
+	var reqDTO dto.PreferenceRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&reqDTO); err != nil {
 		utils.ResponseError(w, http.StatusBadRequest, "invalid request body")
 		return
@@ -105,7 +106,7 @@ func (h *UserHandler) UpdatePreference(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reqDTO PreferenceRequestDTO
+	var reqDTO dto.PreferenceRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&reqDTO); err != nil {
 		utils.ResponseError(w, http.StatusBadRequest, "invalid request body")
 		return

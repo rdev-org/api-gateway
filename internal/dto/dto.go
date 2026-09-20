@@ -1,16 +1,17 @@
-package user
+package dto
 
 type ProfileRequestDTO struct {
-	FirstName    string `json:"first_name"`
-	MiddleName   string `json:"middle_name"`
-	LastName     string `json:"last_name"`
-	MobileNumber string `json:"mobile_number"`
-	DateOfBirth  string `json:"date_of_birth"`
-	Gender       string `json:"gender"`
-	Avatar       string `json:"avatar"`
+	FirstName    string             `json:"first_name"`
+	MiddleName   string             `json:"middle_name"`
+	LastName     string             `json:"last_name"`
+	MobileNumber string             `json:"mobile_number"`
+	DateOfBirth  string             `json:"date_of_birth"`
+	Gender       string             `json:"gender"`
+	Avatar       string             `json:"avatar"`
+	Address      *AddressRequestDTO `json:"address"`
 }
 
-type UserAddressRequestDTO struct {
+type AddressRequestDTO struct {
 	AddressLine1  string `json:"address_line1"`
 	AddressLine2  string `json:"address_line2,omitempty"`
 	City          string `json:"city"`

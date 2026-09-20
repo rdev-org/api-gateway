@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/rdev-org/api-gateway/internal/dto"
 	"github.com/rdev-org/api-gateway/internal/shared"
 	"github.com/rdev-org/api-gateway/internal/utils"
 	pbCommon "github.com/rdev-org/proto-contracts/pb/common"
@@ -69,16 +70,18 @@ func (h *UserHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reqDTO ProfileRequestDTO
+	var reqDTO dto.ProfileRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&reqDTO); err != nil {
 		utils.ResponseError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	user_id := r.Header.Get("X-User-Id")
+	email := r.URL.Query().Get("email")
 	grpcResp, err := h.c.CreateProfile(r.Context(), &pb.CreateProfileRequest{
-		Profile: &pb.Profile{
+		Payload: &pb.CreateProfilePayload{
 			UserId:       user_id,
+			Email:        email,
 			FirstName:    reqDTO.FirstName,
 			MiddleName:   reqDTO.MiddleName,
 			LastName:     reqDTO.LastName,
@@ -86,6 +89,16 @@ func (h *UserHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
 			DateOfBirth:  reqDTO.DateOfBirth,
 			Gender:       reqDTO.Gender,
 			Avatar:       reqDTO.Avatar,
+			Address: &pb.Address{
+				AddressLine1:  reqDTO.Address.AddressLine1,
+				AddressLine2:  reqDTO.Address.AddressLine2,
+				City:          reqDTO.Address.City,
+				StateProvince: reqDTO.Address.StateProvince,
+				PostalCode:    reqDTO.Address.PostalCode,
+				Country:       reqDTO.Address.Country,
+				IsDefault:     true,
+				AddressType:   reqDTO.Address.AddressType,
+			},
 		},
 	})
 
@@ -104,7 +117,7 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reqDTO ProfileRequestDTO
+	var reqDTO dto.ProfileRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&reqDTO); err != nil {
 		utils.ResponseError(w, http.StatusBadRequest, "invalid request body")
 		return
