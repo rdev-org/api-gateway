@@ -1,4 +1,4 @@
-package user_address
+package user
 
 import (
 	"encoding/json"
@@ -9,20 +9,10 @@ import (
 	"github.com/rdev-org/api-gateway/internal/shared"
 	"github.com/rdev-org/api-gateway/internal/utils"
 	pbCommon "github.com/rdev-org/proto-contracts/pb/common"
-	pb "github.com/rdev-org/proto-contracts/pb/user_address"
+	pb "github.com/rdev-org/proto-contracts/pb/user"
 )
 
-type UserAddressHandler struct {
-	c pb.UserAddressServiceClient
-}
-
-func NewUserAddressHandler(c pb.UserAddressServiceClient) *UserAddressHandler {
-	return &UserAddressHandler{
-		c: c,
-	}
-}
-
-func (h *UserAddressHandler) GetAddress(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) GetAddress(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -43,7 +33,7 @@ func (h *UserAddressHandler) GetAddress(w http.ResponseWriter, r *http.Request) 
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserAddressHandler) ListAddress(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) ListAddress(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -80,7 +70,7 @@ func (h *UserAddressHandler) ListAddress(w http.ResponseWriter, r *http.Request)
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserAddressHandler) CreateAddress(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) CreateAddress(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -116,7 +106,7 @@ func (h *UserAddressHandler) CreateAddress(w http.ResponseWriter, r *http.Reques
 	utils.ResponseOk(w, map[string]string{"uuid": grpcResp.GetAddress().GetMeta().GetUuid()})
 }
 
-func (h *UserAddressHandler) UpdateAddress(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) UpdateAddress(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -154,7 +144,7 @@ func (h *UserAddressHandler) UpdateAddress(w http.ResponseWriter, r *http.Reques
 	utils.ResponseOk(w, map[string]string{"uuid": grpcResp.GetAddress().GetMeta().GetUuid()})
 }
 
-func (h *UserAddressHandler) DeleteAddress(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) DeleteAddress(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -174,7 +164,7 @@ func (h *UserAddressHandler) DeleteAddress(w http.ResponseWriter, r *http.Reques
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserAddressHandler) DefaultAddress(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) DefaultAddress(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return

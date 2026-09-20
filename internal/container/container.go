@@ -10,18 +10,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pbAddress "github.com/rdev-org/proto-contracts/pb/user_address"
-	pbCredential "github.com/rdev-org/proto-contracts/pb/user_credential"
-	pbPreference "github.com/rdev-org/proto-contracts/pb/user_preference"
-	pbProfile "github.com/rdev-org/proto-contracts/pb/user_profile"
+	pbAuth "github.com/rdev-org/proto-contracts/pb/auth"
+	pb "github.com/rdev-org/proto-contracts/pb/user"
 )
 
 type UserServiceContainer struct {
-	conn       *grpc.ClientConn
-	credential pbCredential.UserCredentialServiceClient
-	profile    pbProfile.UserProfileServiceClient
-	address    pbAddress.UserAddressServiceClient
-	preference pbPreference.UserPreferenceServiceClient
+	conn *grpc.ClientConn
+	user pb.UserServiceClient
+	auth pbAuth.AuthenticationServiceClient
 }
 
 type NotificationService struct {
@@ -43,10 +39,8 @@ func NewContainer(servicesURL config.ServicesURL, ck config.KafkaConfig) *Contai
 	notifHandler := notification.NewNotificationHandler(&ck)
 
 	r := router.NewRouter(router.Router{
-		Credential:          userClient.credential,
-		Profile:             userClient.profile,
-		Address:             userClient.address,
-		Preference:          userClient.preference,
+		User:                userClient.user,
+		Auth:                userClient.auth,
 		NotificationHandler: notifHandler,
 	})
 
@@ -72,16 +66,12 @@ func setUserService(url string) (UserServiceContainer, error) {
 		log.Fatalf("failed to connect to user service: %v", err)
 	}
 
-	credential := pbCredential.NewUserCredentialServiceClient(conn)
-	profile := pbProfile.NewUserProfileServiceClient(conn)
-	address := pbAddress.NewUserAddressServiceClient(conn)
-	preference := pbPreference.NewUserPreferenceServiceClient(conn)
+	auth := pbAuth.NewAuthenticationServiceClient(conn)
+	user := pb.NewUserServiceClient(conn)
 
 	return UserServiceContainer{
-		conn:       conn,
-		credential: credential,
-		profile:    profile,
-		address:    address,
-		preference: preference,
+		conn: conn,
+		auth: auth,
+		user: user,
 	}, err
 }

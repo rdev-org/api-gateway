@@ -4,32 +4,24 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/rdev-org/api-gateway/internal/handler/auth"
+	"github.com/rdev-org/api-gateway/internal/handler/user"
 	"github.com/rdev-org/api-gateway/internal/notification"
-	"github.com/rdev-org/api-gateway/internal/user_address"
-	"github.com/rdev-org/api-gateway/internal/user_credential"
-	"github.com/rdev-org/api-gateway/internal/user_preference"
-	"github.com/rdev-org/api-gateway/internal/user_profile"
 
-	pbAddress "github.com/rdev-org/proto-contracts/pb/user_address"
-	pbCredential "github.com/rdev-org/proto-contracts/pb/user_credential"
-	pbPreference "github.com/rdev-org/proto-contracts/pb/user_preference"
-	pbProfile "github.com/rdev-org/proto-contracts/pb/user_profile"
+	pbAuth "github.com/rdev-org/proto-contracts/pb/auth"
+	pb "github.com/rdev-org/proto-contracts/pb/user"
 )
 
 type Router struct {
-	Credential          pbCredential.UserCredentialServiceClient
-	Profile             pbProfile.UserProfileServiceClient
-	Address             pbAddress.UserAddressServiceClient
-	Preference          pbPreference.UserPreferenceServiceClient
+	User                pb.UserServiceClient
+	Auth                pbAuth.AuthenticationServiceClient
 	NotificationHandler *notification.NotificationHandler
 }
 
 func NewRouter(r Router) *Router {
 	return &Router{
-		Credential:          r.Credential,
-		Profile:             r.Profile,
-		Address:             r.Address,
-		Preference:          r.Preference,
+		User:                r.User,
+		Auth:                r.Auth,
 		NotificationHandler: r.NotificationHandler,
 	}
 }
@@ -42,11 +34,10 @@ func (rt *Router) SetAllRoutes() *chi.Mux {
 	r.Use(middleware.Heartbeat("/health"))
 
 	r.Route("/api/v1", func(subRouter chi.Router) {
-		rt.SetUserCredentialRoutes(subRouter)
-		rt.SetUserProfileRoutes(subRouter)
-		rt.SetUserAddressRoutes(subRouter)
-		rt.SetUserPreferenceRoutes(subRouter)
+		rt.RegisterAuthenticationRoute(subRouter)
 		rt.SetNotificationRoute(subRouter)
+
+		rt.RegisterUserRoutes(subRouter)
 	})
 
 	return r
@@ -58,8 +49,8 @@ func (rt *Router) SetNotificationRoute(r chi.Router) {
 	}
 }
 
-func (rt *Router) SetUserCredentialRoutes(r chi.Router) {
-	h := user_credential.NewUserCredentialHandler(rt.Credential)
+func (rt *Router) RegisterAuthenticationRoute(r chi.Router) {
+	h := auth.NewAuthenticationHandler(rt.Auth)
 
 	r.Post("/login", h.Login)
 	r.Post("/register", h.Register)
@@ -72,9 +63,15 @@ func (rt *Router) SetUserCredentialRoutes(r chi.Router) {
 	})
 }
 
-func (rt *Router) SetUserProfileRoutes(r chi.Router) {
-	h := user_profile.NewUserProfileHandler(rt.Profile)
+func (rt *Router) RegisterUserRoutes(r chi.Router) {
+	h := user.NewUserService(rt.User)
 
+	rt.SetUserProfileRoutes(h, r)
+	rt.SetUserAddressRoutes(h, r)
+	rt.SetUserPreferenceRoutes(h, r)
+}
+
+func (rt *Router) SetUserProfileRoutes(h *user.UserHandler, r chi.Router) {
 	r.Get("/profile", h.GetProfile)
 
 	r.Route("/user_profile", func(subRouter chi.Router) {
@@ -85,9 +82,7 @@ func (rt *Router) SetUserProfileRoutes(r chi.Router) {
 	})
 }
 
-func (rt *Router) SetUserAddressRoutes(r chi.Router) {
-	h := user_address.NewUserAddressHandler(rt.Address)
-
+func (rt *Router) SetUserAddressRoutes(h *user.UserHandler, r chi.Router) {
 	r.Route("/user_address", func(subRouter chi.Router) {
 		subRouter.Get("/{uuid}", h.GetAddress)
 		subRouter.Get("/list", h.ListAddress)
@@ -98,9 +93,7 @@ func (rt *Router) SetUserAddressRoutes(r chi.Router) {
 	})
 }
 
-func (rt *Router) SetUserPreferenceRoutes(r chi.Router) {
-	h := user_preference.NewUserPreferenceHandler(rt.Preference)
-
+func (rt *Router) SetUserPreferenceRoutes(h *user.UserHandler, r chi.Router) {
 	r.Route("/user_preference", func(subRouter chi.Router) {
 		subRouter.Get("/{uuid}", h.GetPreference)
 		subRouter.Get("/list", h.ListPreference)

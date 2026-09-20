@@ -1,4 +1,4 @@
-package user_preference
+package user
 
 import (
 	"encoding/json"
@@ -9,21 +9,12 @@ import (
 	"github.com/rdev-org/api-gateway/internal/shared"
 	"github.com/rdev-org/api-gateway/internal/utils"
 	"github.com/rdev-org/helpers/structutil"
+
 	pbCommon "github.com/rdev-org/proto-contracts/pb/common"
-	pb "github.com/rdev-org/proto-contracts/pb/user_preference"
+	pb "github.com/rdev-org/proto-contracts/pb/user"
 )
 
-type UserPreferenceHandler struct {
-	c pb.UserPreferenceServiceClient
-}
-
-func NewUserPreferenceHandler(c pb.UserPreferenceServiceClient) *UserPreferenceHandler {
-	return &UserPreferenceHandler{
-		c: c,
-	}
-}
-
-func (h *UserPreferenceHandler) GetPreference(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) GetPreference(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -43,7 +34,7 @@ func (h *UserPreferenceHandler) GetPreference(w http.ResponseWriter, r *http.Req
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserPreferenceHandler) ListPreference(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) ListPreference(w http.ResponseWriter, r *http.Request) {
 	sf := shared.Filter{Query: r.URL.Query()}
 	filter := sf.SanitizeFilter([]string{
 		"language",
@@ -70,7 +61,7 @@ func (h *UserPreferenceHandler) ListPreference(w http.ResponseWriter, r *http.Re
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserPreferenceHandler) CreatePreference(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) CreatePreference(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -108,7 +99,7 @@ func (h *UserPreferenceHandler) CreatePreference(w http.ResponseWriter, r *http.
 	utils.ResponseCreated(w, grpcResp)
 }
 
-func (h *UserPreferenceHandler) UpdatePreference(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) UpdatePreference(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -149,7 +140,7 @@ func (h *UserPreferenceHandler) UpdatePreference(w http.ResponseWriter, r *http.
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserPreferenceHandler) DeletePreference(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) DeletePreference(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return

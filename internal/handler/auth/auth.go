@@ -1,4 +1,4 @@
-package user_credential
+package auth
 
 import (
 	"encoding/json"
@@ -8,21 +8,21 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/rdev-org/api-gateway/internal/shared"
 	"github.com/rdev-org/api-gateway/internal/utils"
+	pb "github.com/rdev-org/proto-contracts/pb/auth"
 	pbCommon "github.com/rdev-org/proto-contracts/pb/common"
-	pb "github.com/rdev-org/proto-contracts/pb/user_credential"
 )
 
-type UserCredentialHandler struct {
-	c pb.UserCredentialServiceClient
+type AuthenticationHandler struct {
+	c pb.AuthenticationServiceClient
 }
 
-func NewUserCredentialHandler(c pb.UserCredentialServiceClient) *UserCredentialHandler {
-	return &UserCredentialHandler{
+func NewAuthenticationHandler(c pb.AuthenticationServiceClient) *AuthenticationHandler {
+	return &AuthenticationHandler{
 		c: c,
 	}
 }
 
-func (h *UserCredentialHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (h *AuthenticationHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -54,7 +54,7 @@ func (h *UserCredentialHandler) Login(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserCredentialHandler) Register(w http.ResponseWriter, r *http.Request) {
+func (h *AuthenticationHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -79,7 +79,7 @@ func (h *UserCredentialHandler) Register(w http.ResponseWriter, r *http.Request)
 	utils.ResponseCreated(w, grpcResp)
 }
 
-func (h *UserCredentialHandler) DeleteCredential(w http.ResponseWriter, r *http.Request) {
+func (h *AuthenticationHandler) DeleteCredential(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -98,7 +98,7 @@ func (h *UserCredentialHandler) DeleteCredential(w http.ResponseWriter, r *http.
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserCredentialHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+func (h *AuthenticationHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -124,7 +124,7 @@ func (h *UserCredentialHandler) UpdatePassword(w http.ResponseWriter, r *http.Re
 	utils.ResponseCreated(w, grpcResp)
 }
 
-func (h *UserCredentialHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+func (h *AuthenticationHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -154,7 +154,7 @@ func (h *UserCredentialHandler) ResetPassword(w http.ResponseWriter, r *http.Req
 	utils.ResponseCreated(w, grpcResp)
 }
 
-func (h *UserCredentialHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+func (h *AuthenticationHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return

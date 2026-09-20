@@ -1,4 +1,4 @@
-package user_profile
+package user
 
 import (
 	"encoding/json"
@@ -9,20 +9,10 @@ import (
 	"github.com/rdev-org/api-gateway/internal/shared"
 	"github.com/rdev-org/api-gateway/internal/utils"
 	pbCommon "github.com/rdev-org/proto-contracts/pb/common"
-	pb "github.com/rdev-org/proto-contracts/pb/user_profile"
+	pb "github.com/rdev-org/proto-contracts/pb/user"
 )
 
-type UserProfileHandler struct {
-	c pb.UserProfileServiceClient
-}
-
-func NewUserProfileHandler(c pb.UserProfileServiceClient) *UserProfileHandler {
-	return &UserProfileHandler{
-		c: c,
-	}
-}
-
-func (h *UserProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -42,7 +32,7 @@ func (h *UserProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) 
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserProfileHandler) ListProfile(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) ListProfile(w http.ResponseWriter, r *http.Request) {
 	sf := shared.Filter{Query: r.URL.Query()}
 	filter := sf.SanitizeFilter([]string{
 		"first_name",
@@ -73,7 +63,7 @@ func (h *UserProfileHandler) ListProfile(w http.ResponseWriter, r *http.Request)
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserProfileHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -108,7 +98,7 @@ func (h *UserProfileHandler) CreateProfile(w http.ResponseWriter, r *http.Reques
 	utils.ResponseCreated(w, grpcResp)
 }
 
-func (h *UserProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -145,7 +135,7 @@ func (h *UserProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Reques
 	utils.ResponseOk(w, grpcResp)
 }
 
-func (h *UserProfileHandler) DeleteProfile(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) DeleteProfile(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
