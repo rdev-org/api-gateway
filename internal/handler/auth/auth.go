@@ -67,8 +67,7 @@ func (h *AuthenticationHandler) Register(w http.ResponseWriter, r *http.Request)
 	}
 
 	grpcResp, err := h.c.Register(r.Context(), &pb.RegisterRequest{
-		Email:    reqDTO.Email,
-		Password: reqDTO.Password,
+		Email: reqDTO.Email,
 	})
 
 	utils.GetStatusFromError(err, w)

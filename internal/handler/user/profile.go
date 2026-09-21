@@ -96,12 +96,11 @@ func (h *UserHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user_id := r.Header.Get("X-User-Id")
-	email := r.URL.Query().Get("email")
+	token := r.URL.Query().Get("token")
 	grpcResp, err := h.c.CreateProfile(r.Context(), &pb.CreateProfileRequest{
 		Payload: &pb.CreateProfilePayload{
-			UserId:       user_id,
-			Email:        email,
+			Token:        token,
+			Username:     reqDTO.Username,
 			FirstName:    reqDTO.FirstName,
 			MiddleName:   reqDTO.MiddleName,
 			LastName:     reqDTO.LastName,
@@ -109,6 +108,7 @@ func (h *UserHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
 			DateOfBirth:  reqDTO.DateOfBirth,
 			Gender:       reqDTO.Gender,
 			Avatar:       reqDTO.Avatar,
+			Password:     reqDTO.Password,
 			Address: &pb.Address{
 				AddressLine1:  reqDTO.Address.AddressLine1,
 				AddressLine2:  reqDTO.Address.AddressLine2,
