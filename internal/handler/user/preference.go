@@ -21,7 +21,7 @@ func (h *UserHandler) GetPreference(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uuid := r.Header.Get("X-User-Id")
+	uuid := chi.URLParam(r, "uuid")
 	grpcResp, err := h.c.GetPreference(r.Context(), &pb.GetPreferenceRequest{
 		Uuid: uuid,
 	})

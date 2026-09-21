@@ -72,9 +72,10 @@ func (rt *Router) RegisterUserRoutes(r chi.Router) {
 }
 
 func (rt *Router) SetUserProfileRoutes(h *user.UserHandler, r chi.Router) {
-	r.Get("/profile", h.GetProfile)
+	r.Get("/profile", h.MyProfile)
 
 	r.Route("/user_profile", func(subRouter chi.Router) {
+		subRouter.Get("/{uuid}/profile", h.GetProfile)
 		subRouter.Get("/list", h.ListProfile)
 		subRouter.Post("/create", h.CreateProfile)
 		subRouter.Put("/{uuid}/update", h.UpdateProfile)

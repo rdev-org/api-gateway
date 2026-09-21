@@ -13,13 +13,33 @@ import (
 	pb "github.com/rdev-org/proto-contracts/pb/user"
 )
 
-func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) MyProfile(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
 
 	uuid := r.Header.Get("X-User-Id")
+	grpcResp, err := h.c.MyProfile(r.Context(), &pb.GetProfileRequest{
+		Uuid: uuid,
+	})
+
+	utils.GetStatusFromError(err, w)
+	if err != nil {
+		log.Printf("error encounter with status %v", err)
+		return
+	}
+
+	utils.ResponseOk(w, grpcResp)
+}
+
+func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		utils.ResponseError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	uuid := chi.URLParam(r, "uuid")
 	grpcResp, err := h.c.GetProfile(r.Context(), &pb.GetProfileRequest{
 		Uuid: uuid,
 	})
